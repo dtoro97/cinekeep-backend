@@ -1,0 +1,21 @@
+meta {
+  name: Get Watchlist State
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/watchlist/state?mediaType={{mediaType}}&tmdbId={{tmdbId}}
+  body: none
+  auth: none
+}
+
+params:query {
+  mediaType: {{mediaType}}
+  tmdbId: {{tmdbId}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.inWatchlist: eq true
+}

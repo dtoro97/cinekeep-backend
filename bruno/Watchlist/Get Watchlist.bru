@@ -1,0 +1,26 @@
+meta {
+  name: Get Watchlist
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/watchlist?page=0&size=20&sortDirection=desc
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 0
+  size: 20
+  sortDirection: desc
+  ~mediaType: movie
+}
+
+assert {
+  res.status: eq 200
+  res.body.content: isArray
+  res.body.page: eq 0
+  res.body.size: eq 20
+  res.body.totalElements: gte 1
+}

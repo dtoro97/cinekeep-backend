@@ -1,0 +1,16 @@
+meta {
+  name: Remove From Watchlist - Not Found
+  type: http
+  seq: 8
+}
+
+delete {
+  url: {{baseUrl}}/api/watchlist/{{mediaType}}/{{tmdbId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 404
+  res.body.message: eq Watchlist item not found
+}

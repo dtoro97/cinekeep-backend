@@ -1,0 +1,29 @@
+meta {
+  name: Add To Watchlist - Invalid
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{baseUrl}}/api/watchlist
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "tmdbId": {{tmdbId}},
+    "mediaType": "{{mediaType}}",
+    "title": ""
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body.status: eq 400
+  res.body.message: contains title
+}

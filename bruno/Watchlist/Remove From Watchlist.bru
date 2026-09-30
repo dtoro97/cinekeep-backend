@@ -1,0 +1,15 @@
+meta {
+  name: Remove From Watchlist
+  type: http
+  seq: 7
+}
+
+delete {
+  url: {{baseUrl}}/api/watchlist/{{mediaType}}/{{tmdbId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 204
+}
