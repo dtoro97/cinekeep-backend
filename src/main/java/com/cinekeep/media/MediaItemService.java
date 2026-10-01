@@ -15,7 +15,7 @@ public class MediaItemService {
     public MediaItem findOrCreate(MediaItemSnapshot snapshot) {
         return mediaItemRepository.findByMediaTypeAndTmdbId(snapshot.mediaType(), snapshot.tmdbId())
                 .map(mediaItem -> {
-                    mediaItem.updateSnapshot(
+                    mediaItem.mergeSnapshot(
                             snapshot.title(),
                             snapshot.posterPath(),
                             snapshot.backdropPath(),

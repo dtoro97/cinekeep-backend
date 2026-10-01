@@ -80,7 +80,7 @@ public class MediaItem {
         this.voteCount = voteCount;
     }
 
-    public void updateSnapshot(
+    public void mergeSnapshot(
             String title,
             String posterPath,
             String backdropPath,
@@ -89,13 +89,17 @@ public class MediaItem {
             Double voteAverage,
             Integer voteCount
     ) {
-        this.title = title;
-        this.posterPath = posterPath;
-        this.backdropPath = backdropPath;
-        this.overview = overview;
-        this.releaseDate = releaseDate;
-        this.voteAverage = voteAverage;
-        this.voteCount = voteCount;
+        this.title = newValueOrCurrent(title, this.title);
+        this.posterPath = newValueOrCurrent(posterPath, this.posterPath);
+        this.backdropPath = newValueOrCurrent(backdropPath, this.backdropPath);
+        this.overview = newValueOrCurrent(overview, this.overview);
+        this.releaseDate = newValueOrCurrent(releaseDate, this.releaseDate);
+        this.voteAverage = newValueOrCurrent(voteAverage, this.voteAverage);
+        this.voteCount = newValueOrCurrent(voteCount, this.voteCount);
+    }
+
+    private static <T> T newValueOrCurrent(T newValue, T currentValue) {
+        return newValue != null ? newValue : currentValue;
     }
 
     public Long getId() {
