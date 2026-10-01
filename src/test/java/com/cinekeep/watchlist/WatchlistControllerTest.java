@@ -85,16 +85,6 @@ class WatchlistControllerTest {
     }
 
     @Test
-    void getWatchlistStateRejectsMissingParameter() {
-        assertThat(mockMvc.get().uri("/api/watchlist/state?mediaType=movie"))
-                .hasStatus(400)
-                .bodyJson()
-                .hasPathSatisfying("$.message", value -> value.assertThat().asString().contains("tmdbId"));
-
-        verifyNoInteractions(watchlistService);
-    }
-
-    @Test
     void addToWatchlistReturnsCreatedItem() {
         when(watchlistService.addToWatchlist(any())).thenReturn(watchlistItemResponse());
 

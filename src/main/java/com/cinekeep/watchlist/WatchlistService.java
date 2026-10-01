@@ -46,19 +46,6 @@ public class WatchlistService {
         return PageResponse.from(watchlistItems.map(WatchlistItemResponse::from));
     }
 
-    @Transactional(readOnly = true)
-    public WatchlistStateResponse getWatchlistState(MediaType mediaType, Integer tmdbId) {
-        Long userId = currentUserService.getCurrentUser().getId();
-
-        boolean inWatchlist = watchlistItemRepository.existsByUser_IdAndMediaItem_MediaTypeAndMediaItem_TmdbId(
-                userId,
-                mediaType,
-                tmdbId
-        );
-
-        return new WatchlistStateResponse(inWatchlist);
-    }
-
     @Transactional
     public WatchlistItemResponse addToWatchlist(WatchlistItemRequest request) {
         User user = currentUserService.getCurrentUser();

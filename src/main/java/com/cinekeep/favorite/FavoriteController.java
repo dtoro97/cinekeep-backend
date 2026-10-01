@@ -5,7 +5,6 @@ import com.cinekeep.media.MediaType;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -28,14 +27,6 @@ public class FavoriteController {
             @RequestParam(defaultValue = "desc") @Pattern(regexp = "asc|desc") String sortDirection
     ) {
         return favoriteService.getFavorites(mediaType, page, size, Sort.Direction.fromString(sortDirection));
-    }
-
-    @GetMapping("/state")
-    public FavoriteStateResponse getFavoriteState(
-            @RequestParam @NotNull MediaType mediaType,
-            @RequestParam @NotNull Integer tmdbId
-    ) {
-        return favoriteService.getFavoriteState(mediaType, tmdbId);
     }
 
     @PostMapping

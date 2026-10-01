@@ -46,19 +46,6 @@ public class FavoriteService {
         return PageResponse.from(favoriteItems.map(FavoriteItemResponse::from));
     }
 
-    @Transactional(readOnly = true)
-    public FavoriteStateResponse getFavoriteState(MediaType mediaType, Integer tmdbId) {
-        Long userId = currentUserService.getCurrentUser().getId();
-
-        boolean favorite = favoriteItemRepository.existsByUser_IdAndMediaItem_MediaTypeAndMediaItem_TmdbId(
-                userId,
-                mediaType,
-                tmdbId
-        );
-
-        return new FavoriteStateResponse(favorite);
-    }
-
     @Transactional
     public FavoriteItemResponse addToFavorites(FavoriteItemRequest request) {
         User user = currentUserService.getCurrentUser();

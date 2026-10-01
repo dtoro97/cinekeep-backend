@@ -85,16 +85,6 @@ class FavoriteControllerTest {
     }
 
     @Test
-    void getFavoriteStateRejectsMissingParameter() {
-        assertThat(mockMvc.get().uri("/api/favorites/state?mediaType=movie"))
-                .hasStatus(400)
-                .bodyJson()
-                .hasPathSatisfying("$.message", value -> value.assertThat().asString().contains("tmdbId"));
-
-        verifyNoInteractions(favoriteService);
-    }
-
-    @Test
     void addToFavoritesReturnsCreatedItem() {
         when(favoriteService.addToFavorites(any())).thenReturn(favoriteItemResponse());
 
