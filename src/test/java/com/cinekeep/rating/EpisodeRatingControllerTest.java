@@ -1,7 +1,10 @@
 package com.cinekeep.rating;
 
 import com.cinekeep.common.PageResponse;
+import com.cinekeep.auth.SecurityConfig;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.Sort;
@@ -21,6 +24,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @WebMvcTest(EpisodeRatingController.class)
+@Import(SecurityConfig.class)
+@WithMockUser
 class EpisodeRatingControllerTest {
     private static final String EPISODE_URI = "/api/ratings/tv/1396/seasons/1/episodes/1";
     private static final String VALID_REQUEST = """

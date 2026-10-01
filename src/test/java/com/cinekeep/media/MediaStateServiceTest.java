@@ -42,7 +42,7 @@ class MediaStateServiceTest {
 
     @BeforeEach
     void setUp() {
-        user = new User("dev");
+        user = new User("dev@cinekeep.test", "dev", "password-hash");
         ReflectionTestUtils.setField(user, "id", USER_ID);
         when(currentUserService.getCurrentUser()).thenReturn(user);
     }

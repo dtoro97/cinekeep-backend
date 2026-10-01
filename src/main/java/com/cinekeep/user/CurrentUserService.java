@@ -1,11 +1,12 @@
 package com.cinekeep.user;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 @Service
 public class CurrentUserService {
-    private static final Long DEVELOPMENT_USER_ID = 1L;
-
     private final UserRepository userRepository;
 
     public CurrentUserService(UserRepository userRepository) {
@@ -13,7 +14,13 @@ public class CurrentUserService {
     }
 
     public User getCurrentUser() {
-        return userRepository.findById(DEVELOPMENT_USER_ID)
-                .orElseThrow(UserNotFoundException::new);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !(authentication.getPrincipal() instanceof Jwt jwt)) {
+            throw new UserNotAuthenticatedException();
+        }
+
+        return userRepository.findById(Long.valueOf(jwt.getSubject()))
+                .orElseThrow(UserNotAuthenticatedException::new);
     }
 }

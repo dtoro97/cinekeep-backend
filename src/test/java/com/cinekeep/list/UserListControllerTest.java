@@ -2,7 +2,10 @@ package com.cinekeep.list;
 
 import com.cinekeep.common.PageResponse;
 import com.cinekeep.media.MediaType;
+import com.cinekeep.auth.SecurityConfig;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -20,6 +23,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @WebMvcTest(UserListController.class)
+@Import(SecurityConfig.class)
+@WithMockUser
 class UserListControllerTest {
     @Autowired
     private MockMvcTester mockMvc;

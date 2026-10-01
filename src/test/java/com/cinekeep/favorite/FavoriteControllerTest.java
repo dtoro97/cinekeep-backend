@@ -2,7 +2,10 @@ package com.cinekeep.favorite;
 
 import com.cinekeep.common.PageResponse;
 import com.cinekeep.media.MediaType;
+import com.cinekeep.auth.SecurityConfig;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.data.domain.Sort;
@@ -21,6 +24,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @WebMvcTest(FavoriteController.class)
+@Import(SecurityConfig.class)
+@WithMockUser
 class FavoriteControllerTest {
     private static final String VALID_REQUEST = """
             {

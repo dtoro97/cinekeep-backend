@@ -42,7 +42,7 @@ class UserListItemServiceTest {
 
     @BeforeEach
     void setUp() {
-        userList = new UserList(new User("dev"), "Rainy Sunday", null, false, ListSortBy.ORIGINAL_ORDER_ASC);
+        userList = new UserList(new User("dev@cinekeep.test", "dev", "password-hash"), "Rainy Sunday", null, false, ListSortBy.ORIGINAL_ORDER_ASC);
         ReflectionTestUtils.setField(userList, "id", LIST_ID);
         fightClub = new MediaItem(550, MediaType.MOVIE, "Fight Club", null, null, null, null, 8.4, 30000);
         ReflectionTestUtils.setField(fightClub, "id", 1L);
