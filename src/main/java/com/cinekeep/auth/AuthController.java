@@ -22,18 +22,24 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-        return withRefreshCookie(HttpStatus.CREATED, authService.register(request));
+    public ResponseEntity<AuthResponse> register(
+            @Valid @RequestBody RegisterRequest request,
+            HttpServletRequest httpRequest
+    ) {
+        return withRefreshCookie(HttpStatus.CREATED, authService.register(request, httpRequest.getRemoteAddr()));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
-        return withRefreshCookie(HttpStatus.OK, authService.login(request));
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request, HttpServletRequest httpRequest) {
+        return withRefreshCookie(HttpStatus.OK, authService.login(request, httpRequest.getRemoteAddr()));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<AuthResponse> refresh(HttpServletRequest request) {
-        return withRefreshCookie(HttpStatus.OK, authService.refresh(refreshTokenCookies.read(request)));
+        return withRefreshCookie(
+                HttpStatus.OK,
+                authService.refresh(refreshTokenCookies.read(request), request.getRemoteAddr())
+        );
     }
 
     @PostMapping("/logout")

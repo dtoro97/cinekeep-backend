@@ -1,5 +1,6 @@
 package com.cinekeep.auth;
 
+import com.cinekeep.common.TooManyRequestsException;
 import com.cinekeep.user.UserResponse;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,7 @@ import java.time.Instant;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -23,6 +25,7 @@ import static org.mockito.Mockito.when;
 @WebMvcTest(AuthController.class)
 @Import({SecurityConfig.class, RefreshTokenCookies.class})
 class AuthControllerTest {
+    private static final String CLIENT_IP = "127.0.0.1";
     private static final String REGISTER_REQUEST = """
             { "email": "david@example.com", "username": "dtoro", "password": "correct horse" }
             """;
@@ -38,7 +41,7 @@ class AuthControllerTest {
 
     @Test
     void registerReturnsTokensAndSetsRefreshCookie() {
-        when(authService.register(any())).thenReturn(authResult("refresh-token"));
+        when(authService.register(any(), eq(CLIENT_IP))).thenReturn(authResult("refresh-token"));
 
         MvcTestResult result = mockMvc.post().uri("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -73,7 +76,7 @@ class AuthControllerTest {
 
     @Test
     void registerReturnsConflictForTakenEmail() {
-        when(authService.register(any())).thenThrow(new EmailAlreadyExistsException());
+        when(authService.register(any(), eq(CLIENT_IP))).thenThrow(new EmailAlreadyExistsException());
 
         assertThat(mockMvc.post().uri("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -87,7 +90,7 @@ class AuthControllerTest {
 
     @Test
     void loginReturnsTokens() {
-        when(authService.login(any())).thenReturn(authResult("refresh-token"));
+        when(authService.login(any(), eq(CLIENT_IP))).thenReturn(authResult("refresh-token"));
 
         assertThat(mockMvc.post().uri("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -100,7 +103,7 @@ class AuthControllerTest {
 
     @Test
     void loginReturnsUnauthorizedForInvalidCredentials() {
-        when(authService.login(any())).thenThrow(new InvalidCredentialsException());
+        when(authService.login(any(), eq(CLIENT_IP))).thenThrow(new InvalidCredentialsException());
 
         assertThat(mockMvc.post().uri("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -113,8 +116,38 @@ class AuthControllerTest {
     }
 
     @Test
+    void loginReturnsTooManyRequestsWithRetryAfter() {
+        when(authService.login(any(), eq(CLIENT_IP)))
+                .thenThrow(new TooManyRequestsException("Too many login attempts. Try again later.", 120));
+
+        assertThat(mockMvc.post().uri("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(LOGIN_REQUEST))
+                .hasStatus(429)
+                .hasHeader(HttpHeaders.RETRY_AFTER, "120")
+                .bodyJson()
+                .isStrictlyEqualTo("""
+                        { "status": 429, "message": "Too many login attempts. Try again later." }
+                        """);
+    }
+
+    @Test
+    void loginPassesClientIpToService() {
+        when(authService.login(any(), eq("198.51.100.4"))).thenReturn(authResult("refresh-token"));
+
+        assertThat(mockMvc.post().uri("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(LOGIN_REQUEST)
+                .with(request -> {
+                    request.setRemoteAddr("198.51.100.4");
+                    return request;
+                }))
+                .hasStatusOk();
+    }
+
+    @Test
     void refreshUsesTokenFromCookie() {
-        when(authService.refresh("old-refresh-token")).thenReturn(authResult("new-refresh-token"));
+        when(authService.refresh("old-refresh-token", CLIENT_IP)).thenReturn(authResult("new-refresh-token"));
 
         MvcTestResult result = mockMvc.post().uri("/api/auth/refresh")
                 .cookie(new Cookie("cinekeep_refresh_token", "old-refresh-token"))
@@ -126,7 +159,7 @@ class AuthControllerTest {
 
     @Test
     void refreshWithoutCookieReturnsUnauthorized() {
-        when(authService.refresh(null)).thenThrow(new InvalidRefreshTokenException());
+        when(authService.refresh(null, CLIENT_IP)).thenThrow(new InvalidRefreshTokenException());
 
         assertThat(mockMvc.post().uri("/api/auth/refresh"))
                 .hasStatus(401)

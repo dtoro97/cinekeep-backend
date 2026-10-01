@@ -20,6 +20,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
+    private final RateLimiter rateLimiter;
     private final Clock clock;
     private final String unknownUserPasswordHash;
 
@@ -28,18 +29,22 @@ public class AuthService {
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
             RefreshTokenService refreshTokenService,
+            RateLimiter rateLimiter,
             Clock clock
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
+        this.rateLimiter = rateLimiter;
         this.clock = clock;
         this.unknownUserPasswordHash = passwordEncoder.encode("unknown-user-password");
     }
 
     @Transactional
-    public AuthResult register(RegisterRequest request) {
+    public AuthResult register(RegisterRequest request, String clientIp) {
+        rateLimiter.consume(RateLimitRule.REGISTER_BY_IP, clientIp);
+
         String email = normalizeEmail(request.email());
         String username = request.username().strip();
 
@@ -56,18 +61,26 @@ public class AuthService {
     }
 
     @Transactional
-    public AuthResult login(LoginRequest request) {
-        Optional<User> user = userRepository.findByEmail(normalizeEmail(request.email()));
+    public AuthResult login(LoginRequest request, String clientIp) {
+        String email = normalizeEmail(request.email());
+        rateLimiter.consume(RateLimitRule.LOGIN_BY_IP, clientIp);
+        rateLimiter.ensureAvailable(RateLimitRule.LOGIN_FAILURES_BY_EMAIL, email);
+
+        Optional<User> user = userRepository.findByEmail(email);
         String passwordHash = user.map(User::getPasswordHash).orElse(unknownUserPasswordHash);
 
         if (!passwordEncoder.matches(request.password(), passwordHash) || user.isEmpty()) {
+            rateLimiter.recordAttempt(RateLimitRule.LOGIN_FAILURES_BY_EMAIL, email);
             throw new InvalidCredentialsException();
         }
 
+        rateLimiter.reset(RateLimitRule.LOGIN_FAILURES_BY_EMAIL, email);
         return issueTokens(user.get());
     }
 
-    public AuthResult refresh(String refreshToken) {
+    public AuthResult refresh(String refreshToken, String clientIp) {
+        rateLimiter.consume(RateLimitRule.REFRESH_BY_IP, clientIp);
+
         if (refreshToken == null || refreshToken.isBlank()) {
             throw new InvalidRefreshTokenException();
         }
