@@ -1,11 +1,11 @@
 meta {
-  name: Get Watchlist
+  name: Get Favorites
   type: http
   seq: 3
 }
 
 get {
-  url: {{baseUrl}}/api/watchlist?page=0&size=20&sortDirection=desc
+  url: {{baseUrl}}/api/favorites?page=0&size=20&sortDirection=desc
   body: none
   auth: none
 }

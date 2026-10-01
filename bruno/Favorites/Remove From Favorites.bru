@@ -1,11 +1,11 @@
 meta {
-  name: Remove From Watchlist
+  name: Remove From Favorites
   type: http
   seq: 4
 }
 
 delete {
-  url: {{baseUrl}}/api/watchlist/{{mediaType}}/{{tmdbId}}
+  url: {{baseUrl}}/api/favorites/{{mediaType}}/{{tmdbId}}
   body: none
   auth: none
 }

@@ -1,0 +1,27 @@
+meta {
+  name: Rate - Update
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/api/ratings/{{mediaType}}/{{tmdbId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "value": 6.5,
+    "title": "Fight Club"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.value: eq 6.5
+}

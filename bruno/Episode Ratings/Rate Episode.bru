@@ -1,0 +1,42 @@
+meta {
+  name: Rate Episode
+  type: http
+  seq: 1
+}
+
+put {
+  url: {{baseUrl}}/api/ratings/tv/{{seriesTmdbId}}/seasons/{{seasonNumber}}/episodes/{{episodeNumber}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "value": 9,
+    "episodeName": "Pilot",
+    "stillPath": "/ydlY3iPfeOAvu8gVqrxPoMvzNCn.jpg",
+    "airDate": "2008-01-20",
+    "series": {
+      "title": "Breaking Bad",
+      "posterPath": "/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
+      "backdropPath": "/9faGSFi5jam6pDWGNd0p8JcJgXQ.jpg",
+      "overview": "Walter White, a New Mexico chemistry teacher, is diagnosed with Stage III cancer and given a prognosis of only two years left to live.",
+      "releaseDate": "2008-01-20",
+      "voteAverage": 8.9,
+      "voteCount": 15000
+    }
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.seriesTmdbId: eq {{seriesTmdbId}}
+  res.body.seriesTitle: eq Breaking Bad
+  res.body.seasonNumber: eq {{seasonNumber}}
+  res.body.episodeNumber: eq {{episodeNumber}}
+  res.body.value: eq 9
+}

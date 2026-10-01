@@ -7,6 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.validation.method.ParameterErrors;
+import org.springframework.validation.method.ParameterValidationResult;
 import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,6 +19,7 @@ import org.springframework.web.method.annotation.HandlerMethodValidationExceptio
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -45,7 +49,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             WebRequest request
     ) {
         String message = exception.getBindingResult().getFieldErrors().stream()
-                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .map(this::toFieldMessage)
                 .sorted()
                 .collect(Collectors.joining(", "));
 
@@ -60,12 +64,25 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             WebRequest request
     ) {
         String message = exception.getParameterValidationResults().stream()
-                .flatMap(result -> result.getResolvableErrors().stream()
-                        .map(error -> result.getMethodParameter().getParameterName() + ": " + error.getDefaultMessage()))
+                .flatMap(this::toParameterMessages)
                 .sorted()
                 .collect(Collectors.joining(", "));
 
         return handleExceptionInternal(exception, new ApiErrorResponse(status.value(), message), headers, status, request);
+    }
+
+    private Stream<String> toParameterMessages(ParameterValidationResult result) {
+        if (result instanceof ParameterErrors parameterErrors) {
+            return parameterErrors.getFieldErrors().stream().map(this::toFieldMessage);
+        }
+
+        String parameterName = result.getMethodParameter().getParameterName();
+        return result.getResolvableErrors().stream()
+                .map(error -> parameterName + ": " + error.getDefaultMessage());
+    }
+
+    private String toFieldMessage(FieldError error) {
+        return error.getField() + ": " + error.getDefaultMessage();
     }
 
     @Override

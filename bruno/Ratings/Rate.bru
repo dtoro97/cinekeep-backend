@@ -1,0 +1,36 @@
+meta {
+  name: Rate
+  type: http
+  seq: 1
+}
+
+put {
+  url: {{baseUrl}}/api/ratings/{{mediaType}}/{{tmdbId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "value": 8,
+    "title": "Fight Club",
+    "posterPath": "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
+    "backdropPath": "/hZkgoQYus5vegHoetLkCJzb17zJ.jpg",
+    "overview": "A ticking-time-bomb insomniac and a slippery soap salesman channel primal male aggression into a shocking new form of therapy.",
+    "releaseDate": "1999-10-15",
+    "voteAverage": 8.4,
+    "voteCount": 30000
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.tmdbId: eq {{tmdbId}}
+  res.body.mediaType: eq {{mediaType}}
+  res.body.value: eq 8
+  res.body.ratedAt: isDefined
+}

@@ -1,0 +1,16 @@
+meta {
+  name: Delete Episode Rating - Not Found
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{baseUrl}}/api/ratings/tv/{{seriesTmdbId}}/seasons/{{seasonNumber}}/episodes/{{episodeNumber}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 404
+  res.body.message: eq Episode rating not found
+}

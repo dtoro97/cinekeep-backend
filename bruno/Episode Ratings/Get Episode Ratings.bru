@@ -1,11 +1,11 @@
 meta {
-  name: Get Watchlist
+  name: Get Episode Ratings
   type: http
-  seq: 3
+  seq: 4
 }
 
 get {
-  url: {{baseUrl}}/api/watchlist?page=0&size=20&sortDirection=desc
+  url: {{baseUrl}}/api/ratings/episodes?page=0&size=20&sortDirection=desc
   body: none
   auth: none
 }
@@ -14,13 +14,10 @@ params:query {
   page: 0
   size: 20
   sortDirection: desc
-  ~mediaType: movie
 }
 
 assert {
   res.status: eq 200
   res.body.content: isArray
-  res.body.page: eq 0
-  res.body.size: eq 20
   res.body.totalElements: gte 1
 }

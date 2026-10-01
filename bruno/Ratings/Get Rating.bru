@@ -1,0 +1,17 @@
+meta {
+  name: Get Rating
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/ratings/{{mediaType}}/{{tmdbId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.value: eq 6.5
+  res.body.title: eq Fight Club
+}

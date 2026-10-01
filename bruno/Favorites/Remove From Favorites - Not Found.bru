@@ -1,0 +1,16 @@
+meta {
+  name: Remove From Favorites - Not Found
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/favorites/{{mediaType}}/{{tmdbId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 404
+  res.body.message: eq Favorite item not found
+}
